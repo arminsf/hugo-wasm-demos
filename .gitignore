@@ -1,0 +1,7 @@
+build-web
+
+cpp/build
+cpp/build-web
+
+hugo/public
+hugo/.hugo_build.lock

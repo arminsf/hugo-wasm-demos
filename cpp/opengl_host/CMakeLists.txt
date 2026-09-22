@@ -1,0 +1,5 @@
+add_library(opengl_host OBJECT opengl_host.cpp)
+target_link_libraries(opengl_host PUBLIC demo_core sdl3_dep)
+if(NOT EMSCRIPTEN)
+    target_link_libraries(opengl_host PUBLIC glad)
+endif()

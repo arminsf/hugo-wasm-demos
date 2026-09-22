@@ -1,0 +1,1 @@
+add_demo(circle_opengl SOURCES circle_opengl.cpp HOST opengl_host)
