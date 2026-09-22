@@ -1,4 +1,4 @@
-# Personal blog
+# Emscripten demos embedded into a Hugo site
 
 ## Building for Hugo
 
