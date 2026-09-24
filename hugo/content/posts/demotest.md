@@ -19,6 +19,6 @@ $$ \int^{2}_{3} abcd $$
 
 ## Second demo
 
-This is another one.
+This is another one. This uses OpenGL.
 
 {{< demo "circle" >}}

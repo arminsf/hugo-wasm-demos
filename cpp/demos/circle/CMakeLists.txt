@@ -1,1 +1,1 @@
-add_demo(circle SOURCES circle.cpp)
+add_demo(circle SOURCES circle.cpp HOST opengl_host)
