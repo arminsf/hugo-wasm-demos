@@ -115,14 +115,14 @@ public:
     }
 
     void draw(demo::Canvas& canvas) override {
-        canvas.stroke({ 0, 0, 0, 255 });
         canvas.fill({ 120, 120, 120, 255 });
         canvas.clear();
+        canvas.stroke({ 0, 0, 0, 255 });
         canvas.fill({ 120, 120, 20, 255 });
+        canvas.line({0, 0}, preferred_size());
         for (Ball& p : balls) {
             canvas.circle(p.pos, p.radius);
         }
-        canvas.line({0, 0}, preferred_size());
     }
 };
 

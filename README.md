@@ -1,6 +1,6 @@
 # Emscripten demos embedded into a Hugo site
 
-## Building for Hugo
+## Building for Hugo with Emscripten
 
 In the root directory:
 
@@ -21,13 +21,4 @@ cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ```
 
-## Building SDL demos only (Emscripten)
-
-To compile to WASM, make sure your environment has [emcc](https://emscripten.org/docs/getting_started/downloads.html), then:
-
-```bash
-emcmake cmake -S . -B build-web -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build-web
-```
-
-Then just use an http server to see them.
+CMake hardcodes the path to the shaders in the source directory, so this is only for development. Emscripten embeds the shaders in the .wasm file.

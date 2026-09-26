@@ -11,28 +11,14 @@
 #include <algorithm>
 #include <memory>
 #include <cmath>
+#include <fstream>
+#include <sstream>
 
 #include <demo/canvas.hpp>
 #include <demo/input.hpp>
 #include <demo/demo.hpp>
 
 namespace {
-
-const char* vertexShaderSource =
-    "#version 300 es\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main() {\n"
-    "    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\n";
-
-const char* fragmentShaderSource =
-    "#version 300 es\n"
-    "precision mediump float;\n"
-    "uniform vec4 color;\n"
-    "out vec4 FragColor;\n"
-    "void main() {\n"
-    "    FragColor = color;\n"
-    "}\n";
 
 class OpenglCanvas : public demo::Canvas {
 
@@ -41,6 +27,8 @@ private:
 
     unsigned int circleVAO_;
     unsigned int circleVBO_;
+    unsigned int lineVAO_;
+    unsigned int lineVBO_;
 
     demo::Vec2 size_;
     demo::Color fill_;
@@ -48,12 +36,12 @@ private:
     bool no_fill_ = false;
     bool no_stroke_ = false;
 
-    void initialize_circle_vao() {
-        glGenVertexArrays(1, &circleVAO_);
-        glGenBuffers(1, &circleVBO_);
+    void initialize_vao(GLuint* vao, GLuint* vbo) {
+        glGenVertexArrays(1, vao);
+        glGenBuffers(1, vbo);
 
-        glBindVertexArray(circleVAO_);
-        glBindBuffer(GL_ARRAY_BUFFER, circleVBO_);
+        glBindVertexArray(*vao);
+        glBindBuffer(GL_ARRAY_BUFFER, *vbo);
 
         glVertexAttribPointer(
             0,
@@ -69,9 +57,19 @@ private:
         glBindVertexArray(0);
     }
 
-    void clean_circle_vao() {
-        glDeleteBuffers(1, &circleVAO_);
-        glDeleteVertexArrays(1, &circleVBO_);
+    void clean_vao(GLuint* vao, GLuint* vbo) {
+        glDeleteBuffers(1, vao);
+        glDeleteVertexArrays(1, vbo);
+    }
+
+    void initialize_vaos() {
+        initialize_vao(&lineVAO_, &lineVBO_);
+        initialize_vao(&circleVAO_, &circleVBO_);
+    }
+
+    void clean_vaos() {
+        clean_vao(&lineVAO_, &lineVBO_);
+        clean_vao(&circleVAO_, &circleVBO_);
     }
 
     void set_gl_color(demo::Color c) {
@@ -82,11 +80,11 @@ private:
 public:
     OpenglCanvas(unsigned int shaderProgram, demo::Vec2 size)
        : shaderProgram_(shaderProgram), size_(size) {
-        initialize_circle_vao();
+        initialize_vaos();
     }
 
     ~OpenglCanvas() {
-        clean_circle_vao();
+        clean_vaos();
     }
 
     demo::Vec2 size() const override { return size_; }
@@ -105,6 +103,38 @@ public:
 
     void line(demo::Vec2 a, demo::Vec2 b) override {
         if (no_stroke_) return;
+
+        float vertices[6];
+
+        vertices[0] = a.x;
+        vertices[1] = a.y;
+        vertices[2] = 0.0f;
+
+        vertices[3] = b.x;
+        vertices[4] = b.y;
+        vertices[5] = 0.0f;
+
+        for (int i = 0; i < 2; i++) {
+            vertices[3*i] -= 0.5f * size_.x;
+            vertices[3*i+1] -= 0.5f * size_.y;
+            vertices[3*i] *= 2.0f / size_.x;
+            vertices[3*i+1] *= -2.0f / size_.y;
+        }
+
+        glBindVertexArray(lineVAO_);
+        glBindBuffer(GL_ARRAY_BUFFER, lineVBO_);
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(vertices),
+            vertices,
+            GL_DYNAMIC_DRAW
+        );
+
+        glUseProgram(shaderProgram_);
+
+        set_gl_color(stroke_);
+        glDrawArrays(GL_LINE_LOOP, 0, 2);
     }
 
     void circle(demo::Vec2 center, float radius) override {
@@ -115,7 +145,7 @@ public:
 
         vertices[0] = center.x;
         vertices[1] = center.y;
-        vertices[2] = 0.5f;
+        vertices[2] = 0.0f;
 
         for (int i = 1; i <= ntriangles + 1; i++) {
             vertices[3*i] =
@@ -174,6 +204,14 @@ struct HostData {
 
 }
 
+std::string load_shader(const std::string& filename) {
+    std::ifstream file;
+    file.open(filename);
+    std::stringstream str;
+    str << file.rdbuf();
+    return str.str();
+}
+
 SDL_AppResult SDL_AppInit(void** state, int argc, char** argv) {
     HostData* hostdata = new HostData;
     *state = hostdata;
@@ -218,6 +256,11 @@ SDL_AppResult SDL_AppInit(void** state, int argc, char** argv) {
     
     int  success;
     char infoLog[512];
+
+    const std::string vss = load_shader(std::string(SHADER_SRC_DIR) + "/basic.vert");
+    const std::string fss = load_shader(std::string(SHADER_SRC_DIR) + "/basic.frag");
+    const char* const vertexShaderSource = vss.c_str();
+    const char* const fragmentShaderSource = fss.c_str();
 
     hostdata->vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(hostdata->vertexShader, 1, &vertexShaderSource, NULL);
