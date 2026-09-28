@@ -11,8 +11,6 @@ struct Line3 {
 
 class EarthSphereDemo : public demo::Demo {
 private:
-    const int longitude_lines = 12;
-    const int latitude_lines = 12;
     demo::Vec3 sphere_center;
     float sphere_radius;
     std::vector<Line3> sphere_lines;
@@ -152,17 +150,17 @@ private:
 
 public:
     const char* title() const override { return "Earth demo"; };
-    demo::Vec2 preferred_size() const override { return {600, 600}; }
+    demo::Vec2 preferred_size() const override { return {400, 400}; }
 
     EarthSphereDemo() {
-        create_sphere_lines(200.0, 6, 6, 60);
+        create_sphere_lines(150.0, 8, 8, 100);
         rotate_sphere(0.6, 0, 0);
         translate_sphere({preferred_size().x / 2, preferred_size().y / 2, 0.0});
     }
 
     void update(float dt, const demo::InputData& input) override {
         translate_sphere({-preferred_size().x / 2, -preferred_size().y / 2, 0.0});
-        rotate_sphere(-0.2 * dt, 1.0 * dt, 0.01 * dt);
+        rotate_sphere(-0.7 * dt, 1.0 * dt, -0.3 * dt);
         translate_sphere({preferred_size().x / 2, preferred_size().y / 2, 0.0});
     }
 
@@ -170,7 +168,7 @@ public:
         canvas.fill({ 80, 80, 100, 255 });
         canvas.clear();
         canvas.stroke({ 80, 80, 100, 255 });
-        canvas.fill({120, 120, 130, 255});
+        canvas.fill({180, 180, 200, 255});
         draw_sphere(canvas, false);
     }
 };

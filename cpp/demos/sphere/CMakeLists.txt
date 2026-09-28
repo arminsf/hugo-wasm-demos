@@ -1,0 +1,1 @@
+add_demo(sphere SOURCES sphere.cpp HOST opengl_host)

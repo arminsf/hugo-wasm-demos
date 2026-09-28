@@ -10,7 +10,6 @@ This is a test to see if the demo shortcodes work. \( \text{Math} \).
 
 ## First demo
 
-
 The window below should be a demo.
 
 {{< demo "line" >}}
@@ -22,3 +21,7 @@ $$ \int^{2}_{3} abcd $$
 This is another one. This uses OpenGL.
 
 {{< demo "circle" >}}
+
+## Sphere demo
+
+{{< demo "sphere" >}}

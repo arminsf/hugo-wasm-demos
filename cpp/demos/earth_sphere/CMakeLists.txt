@@ -1,1 +1,0 @@
-add_demo(earth_sphere SOURCES earth_sphere.cpp HOST opengl_host)
