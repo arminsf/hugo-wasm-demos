@@ -131,6 +131,7 @@ public:
             GL_DYNAMIC_DRAW
         );
 
+        glLineWidth(2.0);
         glUseProgram(shaderProgram_);
 
         set_gl_color(stroke_);
