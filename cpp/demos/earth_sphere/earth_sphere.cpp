@@ -167,9 +167,10 @@ public:
     }
 
     void draw(demo::Canvas& canvas) override {
-        canvas.fill({ 120, 120, 120, 255 });
+        canvas.fill({ 80, 80, 100, 255 });
         canvas.clear();
-        canvas.stroke({ 0, 0, 0, 255 });
+        canvas.stroke({ 80, 80, 100, 255 });
+        canvas.fill({120, 120, 130, 255});
         draw_sphere(canvas, false);
     }
 };

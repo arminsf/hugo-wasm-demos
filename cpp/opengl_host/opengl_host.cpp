@@ -74,7 +74,7 @@ private:
 
     void set_gl_color(demo::Color c) {
         GLint color_loc = glGetUniformLocation(shaderProgram_, "color");
-        glUniform4f(color_loc, c.r, c.g, c.b, c.a);
+        glUniform4f(color_loc, c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
     }
 
 public:
