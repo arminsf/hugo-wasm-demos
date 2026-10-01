@@ -45,6 +45,20 @@ public:
         SDL_RenderLine(renderer_, a.x, a.y, b.x, b.y);
     }
 
+    void polyline(std::span<demo::Vec2> coords) override {
+        if (no_stroke_) return;
+        SDL_SetRenderDrawColor(renderer_, stroke_.r, stroke_.g, stroke_.b, stroke_.a);
+        for (std::size_t i = 0; i < coords.size(); i++) {
+            SDL_RenderLine(
+                renderer_,
+                coords[i].x,
+                coords[i].y,
+                coords[i+1].x,
+                coords[i+1].y
+            );
+        }
+    }
+
     void circle(demo::Vec2 center, float radius) override {
         SDL_SetRenderDrawColor(renderer_, fill_.r, fill_.g, fill_.b, fill_.a);
         const int r = static_cast<int>(radius);

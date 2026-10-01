@@ -10,6 +10,8 @@
 
 #include <algorithm>
 #include <memory>
+#include <vector>
+#include <span>
 #include <cmath>
 #include <fstream>
 #include <sstream>
@@ -17,6 +19,8 @@
 #include <demo/canvas.hpp>
 #include <demo/input.hpp>
 #include <demo/demo.hpp>
+
+#define PI M_PI
 
 namespace {
 
@@ -58,8 +62,8 @@ private:
     }
 
     void clean_vao(GLuint* vao, GLuint* vbo) {
-        glDeleteBuffers(1, vao);
-        glDeleteVertexArrays(1, vbo);
+        glDeleteBuffers(1, vbo);
+        glDeleteVertexArrays(1, vao);
     }
 
     void initialize_vaos() {
@@ -89,8 +93,16 @@ public:
 
     demo::Vec2 size() const override { return size_; }
 
-    void fill(demo::Color c) override { no_fill_ = false; fill_ = c; }
-    void stroke(demo::Color c) override { no_stroke_ = false; stroke_ = c; }
+    void fill(demo::Color c) override { 
+        no_fill_ = false; 
+        fill_ = c; 
+        set_gl_color(fill_);
+    }
+    void stroke(demo::Color c) override { 
+        no_stroke_ = false;
+        stroke_ = c;
+        set_gl_color(stroke_);
+    }
     void no_fill() override { no_fill_ = true; }
     void no_stroke() override { no_stroke_ = true; }
 
@@ -134,8 +146,41 @@ public:
         // glLineWidth(2.0);
         glUseProgram(shaderProgram_);
 
-        set_gl_color(stroke_);
-        glDrawArrays(GL_LINE_LOOP, 0, 2);
+        glDrawArrays(GL_LINES, 0, 2);
+    }
+
+    void polyline(std::span<demo::Vec2> coords) override {
+        if (no_stroke_) return;
+
+        const std::size_t n = coords.size();
+
+        std::vector<float> vertices(3 * n, 0.0);
+
+        for (std::size_t i = 0; i < n; i++) {
+            vertices[3*i] = coords[i].x;
+            vertices[3*i+1] = coords[i].y;
+            vertices[3*i+2] = 0.0f;
+
+            vertices[3*i] -= 0.5f * size_.x;
+            vertices[3*i+1] -= 0.5f * size_.y;
+            vertices[3*i] *= 2.0f / size_.x;
+            vertices[3*i+1] *= -2.0f / size_.y;
+        }
+
+        glBindVertexArray(lineVAO_);
+        glBindBuffer(GL_ARRAY_BUFFER, lineVBO_);
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(float) * 3 * n,
+            vertices.data(),
+            GL_DYNAMIC_DRAW
+        );
+
+        // glLineWidth(2.0);
+        glUseProgram(shaderProgram_);
+
+        glDrawArrays(GL_LINES, 0, n);
     }
 
     void circle(demo::Vec2 center, float radius) override {
@@ -150,10 +195,10 @@ public:
 
         for (int i = 1; i <= ntriangles + 1; i++) {
             vertices[3*i] =
-                center.x + radius * std::cos(i * 2 * M_PI / ntriangles);
+                center.x + radius * std::cos(i * 2 * PI / ntriangles);
 
             vertices[3*i+1] =
-                center.y + radius * std::sin(i * 2 * M_PI / ntriangles);
+                center.y + radius * std::sin(i * 2 * PI / ntriangles);
 
             vertices[3*i+2] = 0.5f;
         }

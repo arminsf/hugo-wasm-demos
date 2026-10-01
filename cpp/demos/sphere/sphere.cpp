@@ -4,13 +4,17 @@
 
 #include <demo/demo.hpp>
 
+#define PI M_PI
+
 struct Line3 {
     demo::Vec3 a;
     demo::Vec3 b;
 };
 
-class EarthSphereDemo : public demo::Demo {
+class SphereDemo : public demo::Demo {
 private:
+    const float zfactor = 0;
+
     demo::Vec3 sphere_center;
     float sphere_radius;
     std::vector<Line3> sphere_lines;
@@ -20,12 +24,12 @@ private:
 
         // latitude
         for (int i = 1; i <= latitude_lines; i++) {
-            const float theta = i * M_PI / (latitude_lines + 1);
+            const float theta = i * PI / (latitude_lines + 1);
             const float circle_radius = radius * sin(theta);
             const float height = radius * cos(theta);
             for (int j = 0; j < circle_sides; j++) {
-                const float alpha1 = 2 * j * M_PI / circle_sides;
-                const float alpha2 = 2 * (j+1) * M_PI / circle_sides;
+                const float alpha1 = 2 * j * PI / circle_sides;
+                const float alpha2 = 2 * (j+1) * PI / circle_sides;
                 Line3 l;
                 l.a.x = circle_radius * sin(alpha1);
                 l.a.z = circle_radius * cos(alpha1);
@@ -41,8 +45,8 @@ private:
         std::vector<Line3> great_circle;
 
         for (int j = 0; j < circle_sides; j++) { 
-            const float alpha1 = 2 * j * M_PI / circle_sides;
-            const float alpha2 = 2 * (j+1) * M_PI / circle_sides;
+            const float alpha1 = 2 * j * PI / circle_sides;
+            const float alpha2 = 2 * (j+1) * PI / circle_sides;
             Line3 l;
             l.a.x = 0;
             l.a.y = radius * sin(alpha1);
@@ -55,7 +59,7 @@ private:
         }
 
         for (int i = 0; i < longitude_lines; i++) {
-            const float theta = i * M_PI / longitude_lines;
+            const float theta = i * PI / longitude_lines;
             for (const Line3& l : great_circle) {
                 Line3 rotated;
                 rotated.a.x = cos(theta) * l.a.x + sin(theta) * l.a.z;
@@ -130,7 +134,7 @@ private:
 
     void draw_line3(demo::Canvas& canvas, const Line3& line) {
         // add perspective later
-        const float zfactor = 0;
+        
         canvas.line({
                         line.a.x / (1 + line.a.z * zfactor),
                         line.a.y / (1 + line.a.z * zfactor)
@@ -142,25 +146,34 @@ private:
     
     void draw_sphere(demo::Canvas& canvas, bool seethrough) {
         canvas.circle({sphere_center.x, sphere_center.y}, sphere_radius);
-        for (Line3& line : sphere_lines) {
-            if (seethrough || line.a.z >= 0 || line.b.z >= 0)
-                draw_line3(canvas, line);
+
+        std::vector<demo::Vec2> coords;
+
+        for (std::size_t i = 0; i < sphere_lines.size(); i++) {
+            if (seethrough || sphere_lines[i].a.z >= 0 || sphere_lines[i].b.z >= 0) {
+                coords.push_back({ sphere_lines[i].a.x, sphere_lines[i].a.y });
+                coords.push_back({ sphere_lines[i].b.x, sphere_lines[i].b.y });
+            }
         }
+
+        canvas.polyline(coords);
     }
 
 public:
     const char* title() const override { return "Earth demo"; };
     demo::Vec2 preferred_size() const override { return {400, 400}; }
 
-    EarthSphereDemo() {
-        create_sphere_lines(150.0, 8, 8, 100);
-        rotate_sphere(0.6, 0, 0);
+    SphereDemo() {
+        create_sphere_lines(150.0, 12, 12, 100);
+        rotate_sphere(-0.4, 0, 0.0);
         translate_sphere({preferred_size().x / 2, preferred_size().y / 2, 0.0});
     }
 
     void update(float dt, const demo::InputData& input) override {
         translate_sphere({-preferred_size().x / 2, -preferred_size().y / 2, 0.0});
-        rotate_sphere(-0.7 * dt, 1.0 * dt, -0.3 * dt);
+        rotate_sphere(0.4, 0, 0);
+        rotate_sphere(0.0, 0.1 * dt, 0.0);
+        rotate_sphere(-0.4, 0, 0);
         translate_sphere({preferred_size().x / 2, preferred_size().y / 2, 0.0});
     }
 
@@ -174,5 +187,5 @@ public:
 };
 
 std::unique_ptr<demo::Demo> demo::create_demo() {
-    return std::make_unique<EarthSphereDemo>();
+    return std::make_unique<SphereDemo>();
 }

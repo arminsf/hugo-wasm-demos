@@ -1,5 +1,7 @@
 #pragma once
 
+#include <span>
+
 #include <demo/types.hpp>
 
 namespace demo {
@@ -16,6 +18,7 @@ public:
     
     virtual void clear() = 0;
     virtual void line(Vec2 a, Vec2 b) = 0;
+    virtual void polyline(std::span<Vec2> coords) = 0;
     virtual void circle(Vec2 center, float radius) = 0;
 };
 

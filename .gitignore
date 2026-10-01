@@ -5,3 +5,4 @@ cpp/build-web
 
 hugo/public
 hugo/.hugo_build.lock
+hugo/static/demos
